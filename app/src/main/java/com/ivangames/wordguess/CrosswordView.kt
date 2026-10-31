@@ -52,7 +52,6 @@ class CrosswordView @JvmOverloads constructor(
         super.onDraw(canvas)
         val rect = RectF()
 
-        // Пустые клетки
         for (word in words) {
             for (i in word.word.indices) {
                 val x = if (word.isHorizontal) word.startX + i else word.startX
@@ -66,7 +65,6 @@ class CrosswordView @JvmOverloads constructor(
             }
         }
 
-        // Угаданные клетки
         for (word in words) {
             if (guessedWords.contains(word.word)) {
                 for (i in word.word.indices) {
@@ -94,12 +92,10 @@ class CrosswordView @JvmOverloads constructor(
         }
     }
 
-    // Проверка, все ли слова угаданы
     fun isLevelComplete(): Boolean {
         return words.all { guessedWords.contains(it.word) }
     }
 
-    // Сброс сетки для нового уровня
     fun reset() {
         guessedWords.clear()
         invalidate()
