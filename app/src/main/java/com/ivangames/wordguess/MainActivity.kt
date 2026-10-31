@@ -18,7 +18,7 @@ class MainActivity : AppCompatActivity() {
 
     private var currentLevel = 0
 
-    // ВСЕ 20 УРОВНЕЙ (Плотная сетка, без дырок)
+    // ВСЕ 20 УРОВНЕЙ (Проверенные координаты)
     private val levels = listOf(
         // 1. КОТ
         Level(listOf('К', 'О', 'Т'), listOf(
@@ -63,11 +63,11 @@ class MainActivity : AppCompatActivity() {
             CrosswordView.WordPlacement("ГОРА", 1, 1, true),
             CrosswordView.WordPlacement("РОГ", 3, 1, false)
         )),
-        // 9. СЛОН
+        // 9. СЛОН (Исправлено)
         Level(listOf('С', 'Л', 'О', 'Н'), listOf(
-            CrosswordView.WordPlacement("СЛОН", 1, 1, true),
-            CrosswordView.WordPlacement("НОС", 3, 1, false),
-            CrosswordView.WordPlacement("СОН", 1, 1, false)
+            CrosswordView.WordPlacement("СЛОН", 1, 1, true),  // Горизонтально
+            CrosswordView.WordPlacement("СОН", 1, 1, false),  // Вертикально от первой 'С'
+            CrosswordView.WordPlacement("НОС", 4, 1, false)   // Вертикально от последней 'Н'
         )),
         // 10. ВОДА
         Level(listOf('В', 'О', 'Д', 'А'), listOf(
@@ -145,14 +145,6 @@ class MainActivity : AppCompatActivity() {
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        Thread.setDefaultUncaughtExceptionHandler { _, e ->
-            val errorText = android.util.Log.getStackTraceString(e)
-            runOnUiThread {
-                showErrorScreen(errorText)
-                logToFile("CRASH: $errorText")
-            }
-        }
-
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -161,78 +153,39 @@ class MainActivity : AppCompatActivity() {
         crosswordView = findViewById(R.id.crosswordView)
         tvCurrentWord = findViewById(R.id.tvCurrentWord)
 
-        logToFile("Приложение запущено")
         loadLevel(currentLevel)
     }
 
-    private fun showErrorScreen(error: String) {
-        val tv = TextView(this).apply {
-            text = "ОШИБКА:\n\n$error"
-            setTextColor(android.graphics.Color.RED)
-            setBackgroundColor(android.graphics.Color.BLACK)
-            textSize = 12f
-            setPadding(20, 20, 20, 20)
-            isVerticalScrollBarEnabled = true
-        }
-        setContentView(tv)
-    }
-
     private fun loadLevel(levelIndex: Int) {
-        try {
-            if (levelIndex >= levels.size) {
-                tvCurrentWord.text = "Все 20 уровней пройдены! 🎉"
-                return
-            }
-
-            logToFile("Начинаем загрузку уровня ${levelIndex + 1}")
-
-            val level = levels[levelIndex]
-            
-            logToFile("Ставим фон")
-            rootLayout.setBackgroundResource(backgrounds[Random.nextInt(backgrounds.size)])
-            
-            logToFile("Ставим буквы: ${level.letters}")
-            letterCircle.letters = level.letters
-
-            logToFile("Ставим слова: ${level.words.map { it.word }}")
-            crosswordView.words = level.words
-            
-            logToFile("Сбрасываем сетку")
-            crosswordView.reset()
-
-            tvCurrentWord.text = "Уровень ${levelIndex + 1}"
-
-            val validWords = level.words.map { it.word }.toSet()
-
-            letterCircle.onWordCompleted = { word ->
-                tvCurrentWord.text = "Собрано: $word"
-                
-                if (validWords.contains(word)) {
-                    crosswordView.addGuessedWord(word)
-                    tvCurrentWord.text = "Отлично! $word"
-                    
-                    if (crosswordView.isLevelComplete()) {
-                        showWinDialog(levelIndex)
-                    }
-                } else {
-                    tvCurrentWord.text = "Не угадал: $word"
-                }
-            }
-            logToFile("Уровень ${levelIndex + 1} успешно загружен")
-            
-        } catch (e: Exception) {
-            logToFile("ОШИБКА при загрузке: ${e.message}\n${e.stackTraceToString()}")
-            throw e
+        if (levelIndex >= levels.size) {
+            tvCurrentWord.text = "Все 20 уровней пройдены! 🎉"
+            return
         }
-    }
 
-    private fun logToFile(message: String) {
-        try {
-            val downloadsDir = android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS)
-            val file = java.io.File(downloadsDir, "wordguess_log.txt")
-            file.appendText("${java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())}: $message\n")
-        } catch (e: Exception) {
-            // Если не пишется - ничего не делаем
+        val level = levels[levelIndex]
+        rootLayout.setBackgroundResource(backgrounds[Random.nextInt(backgrounds.size)])
+        letterCircle.letters = level.letters
+
+        crosswordView.words = level.words
+        crosswordView.reset()
+
+        tvCurrentWord.text = "Уровень ${levelIndex + 1}"
+
+        val validWords = level.words.map { it.word }.toSet()
+
+        letterCircle.onWordCompleted = { word ->
+            tvCurrentWord.text = "Собрано: $word"
+            
+            if (validWords.contains(word)) {
+                crosswordView.addGuessedWord(word)
+                tvCurrentWord.text = "Отлично! $word"
+                
+                if (crosswordView.isLevelComplete()) {
+                    showWinDialog(levelIndex)
+                }
+            } else {
+                tvCurrentWord.text = "Не угадал: $word"
+            }
         }
     }
 
