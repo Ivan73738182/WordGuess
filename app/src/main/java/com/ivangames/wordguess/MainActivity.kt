@@ -18,32 +18,26 @@ class MainActivity : AppCompatActivity() {
 
     private var currentLevel = 0
 
-    // Список 20 уровней
     private val levels = listOf(
-        // 1-3: 3 буквы
         Level(listOf('К', 'О', 'Т'), listOf("КОТ", "ТОК")),
         Level(listOf('Р', 'А', 'К'), listOf("РАК", "КАР")),
         Level(listOf('С', 'О', 'Н'), listOf("СОН", "НОС")),
         
-        // 4-6: 4 буквы (простые)
         Level(listOf('Р', 'У', 'К', 'А'), listOf("РУКА", "РАК", "УРА")),
         Level(listOf('М', 'А', 'К', 'О'), listOf("МАКО", "КОМА", "МАК")),
         Level(listOf('Л', 'И', 'С', 'А'), listOf("ЛИСА", "СИЛА", "ЛИС")),
         
-        // 7-10: 4 буквы (сложнее)
         Level(listOf('З', 'И', 'М', 'А'), listOf("ЗИМА", "ЗИМ")),
         Level(listOf('Г', 'О', 'Р', 'А'), listOf("ГОРА", "РОГ")),
         Level(listOf('С', 'Л', 'О', 'Н'), listOf("СЛОН", "НОС", "СОН")),
         Level(listOf('В', 'О', 'Д', 'А'), listOf("ВОДА", "ВОД")),
         
-        // 11-15: 5 букв (средние)
         Level(listOf('К', 'У', 'К', 'Л', 'А'), listOf("КУКЛА", "ЛУК", "КУЛАК")),
         Level(listOf('П', 'Е', 'Н', 'А', 'Л'), listOf("ПЕНАЛ", "ПЕНА", "ЛЕН")),
         Level(listOf('Т', 'О', 'Ч', 'К', 'А'), listOf("ТОЧКА", "ТОК", "КОТ")),
         Level(listOf('С', 'Т', 'Е', 'Н', 'А'), listOf("СТЕНА", "СЕТ", "СТЕН")),
         Level(listOf('К', 'А', 'Р', 'Т', 'А'), listOf("КАРТА", "КАРТ", "РАК")),
         
-        // 16-20: 5 букв (сложные)
         Level(listOf('М', 'А', 'С', 'К', 'А'), listOf("МАСКА", "МАК", "КАСКА")),
         Level(listOf('Р', 'У', 'Ч', 'К', 'А'), listOf("РУЧКА", "РУКА", "РАК")),
         Level(listOf('П', 'Е', 'Ч', 'К', 'А'), listOf("ПЕЧКА", "ПЕЧЬ", "РАК")),
@@ -77,14 +71,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         val level = levels[levelIndex]
-        
-        // Рандомный фон
         rootLayout.setBackgroundResource(backgrounds[Random.nextInt(backgrounds.size)])
 
-        // Буквы для круга
         letterCircle.letters = level.letters
 
-        // Генерируем правильные координаты для сетки
+        // Безопасная генерация
         val placements = generatePlacements(level.words)
         crosswordView.words = placements
         crosswordView.reset()
@@ -109,38 +100,40 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // АВТОМАТИЧЕСКАЯ РАССТАНОВКА СЛОВ
     private fun generatePlacements(words: List<String>): List<CrosswordView.WordPlacement> {
         val placements = mutableListOf<CrosswordView.WordPlacement>()
         if (words.isEmpty()) return placements
 
-        // Первое слово ставим горизонтально в центр
+        // Первое слово ставим горизонтально
         val firstWord = words[0]
-        placements.add(CrosswordView.WordPlacement(firstWord, 0, 2, true)) 
+        // Сдвигаем на 2 клетки от левого края, чтобы было место для вертикальных слов
+        placements.add(CrosswordView.WordPlacement(firstWord, 1, 1, true)) 
         
-        // Остальные слова пытаемся пристроить к первому (пересечение по букве)
         for (i in 1 until words.size) {
             val word = words[i]
             var placed = false
             
-            // Ищем общую букву с первым словом
+            // Пытаемся найти общую букву с первым словом
             for (j in firstWord.indices) {
                 val char = firstWord[j]
                 val indexInWord = word.indexOf(char)
                 if (indexInWord != -1) {
-                    // Нашли пересечение! 
-                    // Ставим вертикально под этой буквой
-                    val startX = j
-                    val startY = 2 - indexInWord
-                    placements.add(CrosswordView.WordPlacement(word, startX, startY, false))
-                    placed = true
-                    break
+                    // Проверяем, не уйдет ли слово в отрицательную зону
+                    val startX = 1 + j // координата X первой буквы первого слова + индекс
+                    val startY = 1 - indexInWord // координата Y
+                    
+                    if (startY >= 0) {
+                        placements.add(CrosswordView.WordPlacement(word, startX, startY, false))
+                        placed = true
+                        break
+                    }
                 }
             }
             
-            // Если не нашли пересечение - ставим отдельно справа
+            // Если не нашли пересечение ИЛИ слово ушло в минус, ставим его отдельно
             if (!placed) {
-                placements.add(CrosswordView.WordPlacement(word, 4, 2, true))
+                // Ставим вертикально справа (безопасная зона)
+                placements.add(CrosswordView.WordPlacement(word, 5, 1, false)) 
             }
         }
         return placements
