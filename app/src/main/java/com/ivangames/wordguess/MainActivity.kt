@@ -17,18 +17,14 @@ class MainActivity : AppCompatActivity() {
         letterCircle.letters = listOf('К', 'О', 'Т')
 
         // Слова для сетки (пересекаются на букве 'Т')
-        // КОТ: x=0, y=0, горизонтально
-        // ТОК: x=2, y=0, вертикально (начинается с 'Т' от КОТ)
         crosswordView.words = listOf(
-            CrosswordView.WordPlacement("КОТ", 0, 0, true),
-            CrosswordView.WordPlacement("ТОК", 2, 0, false)
+            CrosswordView.WordPlacement("КОТ", 0, 0, true), // Горизонтально
+            CrosswordView.WordPlacement("ТОК", 2, 0, false) // Вертикально, начинается с 'Т' (x=2)
         )
 
-        // Когда свайп закончен
         letterCircle.onWordCompleted = { word ->
             tvCurrentWord.text = "Собрано: $word"
             
-            // Если слово правильное (КОТ или ТОК), вписываем в сетку
             if (word == "КОТ" || word == "ТОК") {
                 crosswordView.addGuessedWord(word)
             }

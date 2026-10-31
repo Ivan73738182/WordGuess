@@ -12,20 +12,14 @@ class CrosswordView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
-    // Слово, его координаты (x, y) и направление (true = горизонтально, false = вертикально)
     data class WordPlacement(val word: String, val startX: Int, val startY: Int, val isHorizontal: Boolean)
 
-    // Список слов для текущего уровня
-    var words: List<WordPlacement> = listOf(
-        WordPlacement("КОТ", 0, 0, true),
-        WordPlacement("ТОК", 0, 0, false)
-    )
+    var words: List<WordPlacement> = emptyList()
         set(value) {
             field = value
             invalidate()
         }
 
-    // Буквы, которые уже угаданы (ключ - "x,y", значение - буква)
     private val guessedLetters = mutableMapOf<String, Char>()
 
     private val cellPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -45,7 +39,7 @@ class CrosswordView @JvmOverloads constructor(
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
-        // Вычисляем размер клетки, чтобы сетка влезла
+        // Динамический расчет размера клетки (под 5 клеток в ширину)
         cellSize = Math.min(w, h) / 6f
         offsetX = (w - cellSize * 5) / 2f
         offsetY = (h - cellSize * 5) / 2f
@@ -62,10 +56,10 @@ class CrosswordView @JvmOverloads constructor(
                 
                 val left = offsetX + x * cellSize
                 val top = offsetY + y * cellSize
-                rect.set(left, top, left + cellSize, top + cellSize)
                 
-                // Рисуем пустой белый квадрат
-                canvas.drawRoundRect(rect, 15f, 15f, cellPaint)
+                // Клетки вплотную (без отступов)
+                rect.set(left, top, left + cellSize, top + cellSize)
+                canvas.drawRect(rect, cellPaint)
 
                 // Если буква угадана, рисуем её
                 val key = "$x,$y"
@@ -78,7 +72,6 @@ class CrosswordView @JvmOverloads constructor(
         }
     }
 
-    // Метод для добавления угаданного слова
     fun addGuessedWord(word: String) {
         for (w in words) {
             if (w.word == word) {

@@ -4,11 +4,9 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.Path
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -22,30 +20,39 @@ class LetterCircleView @JvmOverloads constructor(
             invalidate()
         }
 
-    // Слушатель, когда слово собрано
     var onWordCompleted: ((String) -> Unit)? = null
 
     private val circlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#FFFFFF")
+        color = Color.WHITE
         style = Paint.Style.FILL
     }
     private val circleActivePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#FFC107") // Желтый при выделении
+        color = Color.parseColor("#FFC107") // Желтый
         style = Paint.Style.FILL
     }
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#1976D2")
         textSize = 60f
         textAlign = Paint.Align.CENTER
+        isFakeBoldText = true
     }
-    private val linePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#FFC107")
+    
+    // Красивая тонкая линия для "паутины" (фоновые соединения)
+    private val webLinePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#80FFFFFF") // Полупрозрачный белый
+        strokeWidth = 6f
+        style = Paint.Style.STROKE
+        strokeCap = Paint.Cap.ROUND
+    }
+    
+    // Толстая линия для свайпа
+    private val swipeLinePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#FFC107") // Желтый
         strokeWidth = 15f
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.ROUND
     }
 
-    private var radius = 0f
     private var centerX = 0f
     private var centerY = 0f
     private val letterRadius = 70f
@@ -60,7 +67,6 @@ class LetterCircleView @JvmOverloads constructor(
         super.onSizeChanged(w, h, oldw, oldh)
         centerX = w / 2f
         centerY = h / 2f
-        radius = Math.min(w, h) / 2f - letterRadius - 20f
         calculatePositions()
     }
 
@@ -68,9 +74,11 @@ class LetterCircleView @JvmOverloads constructor(
         positions.clear()
         val count = letters.size
         if (count == 0) return
+        
+        // Располагаем буквы по кругу, как на скрине (сверху, справа, снизу, слева и т.д.)
+        val radius = Math.min(centerX, centerY) - letterRadius - 20f
         val angleStep = (2 * Math.PI / count).toFloat()
-        // Начинаем с верхней точки (-90 градусов)
-        val startAngle = -Math.PI.toFloat() / 2
+        val startAngle = -Math.PI.toFloat() / 2 // Начинаем с верхней точки
 
         for (i in 0 until count) {
             val angle = startAngle + i * angleStep
@@ -83,25 +91,34 @@ class LetterCircleView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         
-        // 1. Рисуем линии между выделенными буквами
+        // 1. Рисуем ФОНОВУЮ "паутину" (соединяем ВСЕ буквы со всеми)
+        for (i in positions.indices) {
+            for (j in i + 1 until positions.size) {
+                val p1 = positions[i]
+                val p2 = positions[j]
+                canvas.drawLine(p1.first, p1.second, p2.first, p2.second, webLinePaint)
+            }
+        }
+
+        // 2. Рисуем ЖЕЛТЫЕ линии свайпа (поверх паутины)
         for (i in 0 until selectedIndices.size - 1) {
             val p1 = positions[selectedIndices[i]]
             val p2 = positions[selectedIndices[i + 1]]
-            canvas.drawLine(p1.first, p1.second, p2.first, p2.second, linePaint)
+            canvas.drawLine(p1.first, p1.second, p2.first, p2.second, swipeLinePaint)
         }
-        // Линия к текущему пальцу
+        // Линия от последней буквы к пальцу
         if (selectedIndices.isNotEmpty() && (currentX != 0f || currentY != 0f)) {
             val lastP = positions[selectedIndices.last()]
-            canvas.drawLine(lastP.first, lastP.second, currentX, currentY, linePaint)
+            canvas.drawLine(lastP.first, lastP.second, currentX, currentY, swipeLinePaint)
         }
 
-        // 2. Рисуем буквы
+        // 3. Рисуем кружки и буквы
         for (i in letters.indices) {
             val pos = positions[i]
             val paint = if (selectedIndices.contains(i)) circleActivePaint else circlePaint
             canvas.drawCircle(pos.first, pos.second, letterRadius, paint)
             
-            // Буква
+            // Буква (смещение для центрирования)
             val textY = pos.second - (textPaint.descent() + textPaint.ascent()) / 2
             canvas.drawText(letters[i].toString(), pos.first, textY, textPaint)
         }
@@ -135,7 +152,7 @@ class LetterCircleView @JvmOverloads constructor(
 
     private fun checkTouch(x: Float, y: Float) {
         for (i in positions.indices) {
-            if (selectedIndices.contains(i)) continue // Уже выбрана
+            if (selectedIndices.contains(i)) continue
             
             val pos = positions[i]
             val dist = Math.hypot((x - pos.first).toDouble(), (y - pos.second).toDouble()).toFloat()
