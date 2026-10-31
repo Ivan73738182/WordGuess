@@ -7,7 +7,6 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
-import kotlin.math.min
 import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
@@ -20,30 +19,99 @@ class MainActivity : AppCompatActivity() {
     private var currentLevel = 0
 
     private val levels = listOf(
-        Level(listOf('К', 'О', 'Т'), listOf("КОТ", "ТОК")),
-        Level(listOf('Р', 'А', 'К'), listOf("РАК", "КАР")),
-        Level(listOf('С', 'О', 'Н'), listOf("СОН", "НОС")),
-        
-        Level(listOf('Р', 'У', 'К', 'А'), listOf("РУКА", "РАК", "УРА")),
-        Level(listOf('М', 'А', 'К', 'О'), listOf("МАКО", "КОМА", "МАК")),
-        Level(listOf('Л', 'И', 'С', 'А'), listOf("ЛИСА", "СИЛА", "ЛИС")),
-        
-        Level(listOf('З', 'И', 'М', 'А'), listOf("ЗИМА", "ЗИМ")),
-        Level(listOf('Г', 'О', 'Р', 'А'), listOf("ГОРА", "РОГ")),
-        Level(listOf('С', 'Л', 'О', 'Н'), listOf("СЛОН", "НОС", "СОН")),
-        Level(listOf('В', 'О', 'Д', 'А'), listOf("ВОДА", "ВОД")),
-        
-        Level(listOf('К', 'У', 'К', 'Л', 'А'), listOf("КУКЛА", "ЛУК", "КУЛАК")),
-        Level(listOf('П', 'Е', 'Н', 'А', 'Л'), listOf("ПЕНАЛ", "ПЕНА", "ЛЕН")),
-        Level(listOf('Т', 'О', 'Ч', 'К', 'А'), listOf("ТОЧКА", "ТОК", "КОТ")),
-        Level(listOf('С', 'Т', 'Е', 'Н', 'А'), listOf("СТЕНА", "СЕТ", "СТЕН")),
-        Level(listOf('К', 'А', 'Р', 'Т', 'А'), listOf("КАРТА", "КАРТ", "РАК")),
-        
-        Level(listOf('М', 'А', 'С', 'К', 'А'), listOf("МАСКА", "МАК", "КАСКА")),
-        Level(listOf('Р', 'У', 'Ч', 'К', 'А'), listOf("РУЧКА", "РУКА", "РАК")),
-        Level(listOf('П', 'Е', 'Ч', 'К', 'А'), listOf("ПЕЧКА", "ПЕЧЬ", "РАК")),
-        Level(listOf('Г', 'Р', 'У', 'Ш', 'А'), listOf("ГРУША", "ГРУШ")),
-        Level(listOf('Ш', 'К', 'О', 'Л', 'А'), listOf("ШКОЛА", "ШКОЛ", "КОЛ"))
+        Level(listOf('К', 'О', 'Т'), listOf(
+            CrosswordView.WordPlacement("КОТ", 1, 1, true),
+            CrosswordView.WordPlacement("ТОК", 3, 1, false)
+        )),
+        Level(listOf('Р', 'А', 'К'), listOf(
+            CrosswordView.WordPlacement("РАК", 1, 1, true),
+            CrosswordView.WordPlacement("КАР", 3, 1, false)
+        )),
+        Level(listOf('С', 'О', 'Н'), listOf(
+            CrosswordView.WordPlacement("СОН", 1, 1, true),
+            CrosswordView.WordPlacement("НОС", 3, 1, false)
+        )),
+        Level(listOf('Р', 'У', 'К', 'А'), listOf(
+            CrosswordView.WordPlacement("РУКА", 1, 2, true),
+            CrosswordView.WordPlacement("РАК", 1, 2, false),
+            CrosswordView.WordPlacement("УРА", 2, 1, false)
+        )),
+        Level(listOf('М', 'А', 'К', 'О'), listOf(
+            CrosswordView.WordPlacement("МАКО", 1, 2, true),
+            CrosswordView.WordPlacement("МАК", 1, 2, false),
+            CrosswordView.WordPlacement("КОМА", 2, 1, false)
+        )),
+        Level(listOf('Л', 'И', 'С', 'А'), listOf(
+            CrosswordView.WordPlacement("ЛИСА", 1, 2, true),
+            CrosswordView.WordPlacement("СИЛА", 2, 1, false),
+            CrosswordView.WordPlacement("ЛИС", 1, 2, false)
+        )),
+        Level(listOf('З', 'И', 'М', 'А'), listOf(
+            CrosswordView.WordPlacement("ЗИМА", 1, 1, true),
+            CrosswordView.WordPlacement("ЗИМ", 1, 1, false)
+        )),
+        Level(listOf('Г', 'О', 'Р', 'А'), listOf(
+            CrosswordView.WordPlacement("ГОРА", 1, 1, true),
+            CrosswordView.WordPlacement("РОГ", 2, 1, false)
+        )),
+        Level(listOf('С', 'Л', 'О', 'Н'), listOf(
+            CrosswordView.WordPlacement("СЛОН", 1, 2, true),
+            CrosswordView.WordPlacement("НОС", 3, 1, false),
+            CrosswordView.WordPlacement("СОН", 1, 1, false)
+        )),
+        Level(listOf('В', 'О', 'Д', 'А'), listOf(
+            CrosswordView.WordPlacement("ВОДА", 1, 1, true),
+            CrosswordView.WordPlacement("ВОД", 1, 1, false)
+        )),
+        Level(listOf('К', 'У', 'К', 'Л', 'А'), listOf(
+            CrosswordView.WordPlacement("КУКЛА", 1, 2, true),
+            CrosswordView.WordPlacement("ЛУК", 3, 1, false),
+            CrosswordView.WordPlacement("КУЛАК", 1, 1, false)
+        )),
+        Level(listOf('П', 'Е', 'Н', 'А', 'Л'), listOf(
+            CrosswordView.WordPlacement("ПЕНАЛ", 1, 2, true),
+            CrosswordView.WordPlacement("ПЕНА", 1, 1, false),
+            CrosswordView.WordPlacement("ЛЕН", 4, 1, false)
+        )),
+        Level(listOf('Т', 'О', 'Ч', 'К', 'А'), listOf(
+            CrosswordView.WordPlacement("ТОЧКА", 1, 2, true),
+            CrosswordView.WordPlacement("ТОК", 1, 1, false),
+            CrosswordView.WordPlacement("КОТ", 3, 2, false)
+        )),
+        Level(listOf('С', 'Т', 'Е', 'Н', 'А'), listOf(
+            CrosswordView.WordPlacement("СТЕНА", 1, 2, true),
+            CrosswordView.WordPlacement("СЕТ", 1, 1, false),
+            CrosswordView.WordPlacement("СТЕН", 1, 2, false)
+        )),
+        Level(listOf('К', 'А', 'Р', 'Т', 'А'), listOf(
+            CrosswordView.WordPlacement("КАРТА", 1, 2, true),
+            CrosswordView.WordPlacement("КАРТ", 1, 2, false),
+            CrosswordView.WordPlacement("РАК", 2, 1, false)
+        )),
+        Level(listOf('М', 'А', 'С', 'К', 'А'), listOf(
+            CrosswordView.WordPlacement("МАСКА", 1, 2, true),
+            CrosswordView.WordPlacement("МАК", 1, 1, false),
+            CrosswordView.WordPlacement("КАСКА", 3, 1, false)
+        )),
+        Level(listOf('Р', 'У', 'Ч', 'К', 'А'), listOf(
+            CrosswordView.WordPlacement("РУЧКА", 1, 2, true),
+            CrosswordView.WordPlacement("РУКА", 1, 1, false),
+            CrosswordView.WordPlacement("РАК", 4, 1, false)
+        )),
+        Level(listOf('П', 'Е', 'Ч', 'К', 'А'), listOf(
+            CrosswordView.WordPlacement("ПЕЧКА", 1, 2, true),
+            CrosswordView.WordPlacement("ПЕЧЬ", 1, 1, false),
+            CrosswordView.WordPlacement("РАК", 4, 1, false)
+        )),
+        Level(listOf('Г', 'Р', 'У', 'Ш', 'А'), listOf(
+            CrosswordView.WordPlacement("ГРУША", 1, 2, true),
+            CrosswordView.WordPlacement("ГРУШ", 1, 1, false)
+        )),
+        Level(listOf('Ш', 'К', 'О', 'Л', 'А'), listOf(
+            CrosswordView.WordPlacement("ШКОЛА", 1, 2, true),
+            CrosswordView.WordPlacement("ШКОЛ", 1, 1, false),
+            CrosswordView.WordPlacement("КОЛ", 2, 1, false)
+        ))
     )
 
     private val backgrounds = listOf(
@@ -54,14 +122,6 @@ class MainActivity : AppCompatActivity() {
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Устанавливаем перехватчик ошибок
-        Thread.setDefaultUncaughtExceptionHandler { _, e ->
-            val errorText = android.util.Log.getStackTraceString(e)
-            runOnUiThread {
-                showErrorScreen(errorText)
-            }
-        }
-
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -71,18 +131,6 @@ class MainActivity : AppCompatActivity() {
         tvCurrentWord = findViewById(R.id.tvCurrentWord)
 
         loadLevel(currentLevel)
-    }
-
-    private fun showErrorScreen(error: String) {
-        val tv = TextView(this).apply {
-            text = "ОШИБКА:\n\n$error"
-            setTextColor(android.graphics.Color.RED)
-            setBackgroundColor(android.graphics.Color.BLACK)
-            textSize = 12f
-            setPadding(20, 20, 20, 20)
-            isVerticalScrollBarEnabled = true
-        }
-        setContentView(tv)
     }
 
     private fun loadLevel(levelIndex: Int) {
@@ -95,13 +143,12 @@ class MainActivity : AppCompatActivity() {
         rootLayout.setBackgroundResource(backgrounds[Random.nextInt(backgrounds.size)])
         letterCircle.letters = level.letters
 
-        val placements = generatePlacements(level.words)
-        crosswordView.words = placements
+        crosswordView.words = level.words
         crosswordView.reset()
 
         tvCurrentWord.text = "Уровень ${levelIndex + 1}"
 
-        val validWords = level.words.toSet()
+        val validWords = level.words.map { it.word }.toSet()
 
         letterCircle.onWordCompleted = { word ->
             tvCurrentWord.text = "Собрано: $word"
@@ -116,49 +163,6 @@ class MainActivity : AppCompatActivity() {
             } else {
                 tvCurrentWord.text = "Не угадал: $word"
             }
-        }
-    }
-
-    private fun generatePlacements(words: List<String>): List<CrosswordView.WordPlacement> {
-        val placements = mutableListOf<CrosswordView.WordPlacement>()
-        if (words.isEmpty()) return placements
-
-        val firstWord = words[0]
-        placements.add(CrosswordView.WordPlacement(firstWord, 0, 0, true))
-
-        for (i in 1 until words.size) {
-            val word = words[i]
-            var placed = false
-            
-            for (j in firstWord.indices) {
-                val char = firstWord[j]
-                val indexInWord = word.indexOf(char)
-                if (indexInWord != -1) {
-                    val startX = j
-                    val startY = -indexInWord 
-                    placements.add(CrosswordView.WordPlacement(word, startX, startY, false))
-                    placed = true
-                    break
-                }
-            }
-            
-            if (!placed) {
-                placements.add(CrosswordView.WordPlacement(word, firstWord.length + 1, 0, true))
-            }
-        }
-        
-        var minX = Int.MAX_VALUE
-        var minY = Int.MAX_VALUE
-        for (p in placements) {
-            minX = min(minX, p.startX)
-            minY = min(minY, p.startY)
-        }
-        
-        val shiftX = -minX
-        val shiftY = -minY
-        
-        return placements.map {
-            it.copy(startX = it.startX + shiftX, startY = it.startY + shiftY)
         }
     }
 
@@ -180,6 +184,6 @@ class MainActivity : AppCompatActivity() {
 
     data class Level(
         val letters: List<Char>,
-        val words: List<String>
+        val words: List<CrosswordView.WordPlacement>
     )
 }

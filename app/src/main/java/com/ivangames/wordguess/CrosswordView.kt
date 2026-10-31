@@ -57,6 +57,9 @@ class CrosswordView @JvmOverloads constructor(
                 val x = if (word.isHorizontal) word.startX + i else word.startX
                 val y = if (word.isHorizontal) word.startY else word.startY + i
                 
+                // ЗАЩИТА: если координаты выходят за пределы (0..5), не рисуем
+                if (x < 0 || x > 5 || y < 0 || y > 5) continue
+                
                 val left = offsetX + x * cellSize
                 val top = offsetY + y * cellSize
                 
@@ -70,6 +73,8 @@ class CrosswordView @JvmOverloads constructor(
                 for (i in word.word.indices) {
                     val x = if (word.isHorizontal) word.startX + i else word.startX
                     val y = if (word.isHorizontal) word.startY else word.startY + i
+                    
+                    if (x < 0 || x > 5 || y < 0 || y > 5) continue
                     
                     val left = offsetX + x * cellSize
                     val top = offsetY + y * cellSize
