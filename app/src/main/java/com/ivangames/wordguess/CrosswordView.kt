@@ -22,13 +22,20 @@ class CrosswordView @JvmOverloads constructor(
 
     private val guessedLetters = mutableMapOf<String, Char>()
 
+    // Светло-голубые пустые клетки
     private val cellPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.WHITE
+        color = Color.parseColor("#B3D4F0") 
         style = Paint.Style.FILL
     }
-    private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+    // Темно-синие угаданные клетки
+    private val cellGuessedPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#1976D2")
-        textSize = 60f
+        style = Paint.Style.FILL
+    }
+    // Белый текст для букв
+    private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.WHITE
+        textSize = 70f
         textAlign = Paint.Align.CENTER
         isFakeBoldText = true
     }
@@ -39,7 +46,6 @@ class CrosswordView @JvmOverloads constructor(
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
-        // Динамический расчет размера клетки (под 5 клеток в ширину)
         cellSize = Math.min(w, h) / 6f
         offsetX = (w - cellSize * 5) / 2f
         offsetY = (h - cellSize * 5) / 2f
@@ -57,16 +63,20 @@ class CrosswordView @JvmOverloads constructor(
                 val left = offsetX + x * cellSize
                 val top = offsetY + y * cellSize
                 
-                // Клетки вплотную (без отступов)
-                rect.set(left, top, left + cellSize, top + cellSize)
-                canvas.drawRect(rect, cellPaint)
+                // Отступы по 6f с каждой стороны (зазоры)
+                rect.set(left + 6f, top + 6f, left + cellSize - 6f, top + cellSize - 6f)
 
-                // Если буква угадана, рисуем её
                 val key = "$x,$y"
+                
                 if (guessedLetters.containsKey(key)) {
+                    // Темно-синяя клетка с белой буквой
+                    canvas.drawRoundRect(rect, 15f, 15f, cellGuessedPaint)
                     val char = guessedLetters[key]!!
                     val textY = top + cellSize / 2 - (textPaint.descent() + textPaint.ascent()) / 2
                     canvas.drawText(char.toString(), left + cellSize / 2, textY, textPaint)
+                } else {
+                    // Светло-голубая пустая клетка
+                    canvas.drawRoundRect(rect, 15f, 15f, cellPaint)
                 }
             }
         }
@@ -77,7 +87,7 @@ class CrosswordView @JvmOverloads constructor(
             if (w.word == word) {
                 for (i in word.indices) {
                     val x = if (w.isHorizontal) w.startX + i else w.startX
-                    val y = if (w.isHorizontal) w.startY else w.startY + i
+                    val y = if (w.isHorizontal) w.startY + i else w.startY
                     guessedLetters["$x,$y"] = word[i]
                 }
             }

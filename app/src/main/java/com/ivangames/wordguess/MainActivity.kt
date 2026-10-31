@@ -13,13 +13,11 @@ class MainActivity : AppCompatActivity() {
         val crosswordView = findViewById<CrosswordView>(R.id.crosswordView)
         val tvCurrentWord = findViewById<TextView>(R.id.tvCurrentWord)
 
-        // Буквы для круга (уровень 1)
         letterCircle.letters = listOf('К', 'О', 'Т')
 
-        // Слова для сетки (пересекаются на букве 'Т')
         crosswordView.words = listOf(
-            CrosswordView.WordPlacement("КОТ", 0, 0, true), // Горизонтально
-            CrosswordView.WordPlacement("ТОК", 2, 0, false) // Вертикально, начинается с 'Т' (x=2)
+            CrosswordView.WordPlacement("КОТ", 0, 0, true),
+            CrosswordView.WordPlacement("ТОК", 2, 0, false)
         )
 
         letterCircle.onWordCompleted = { word ->
