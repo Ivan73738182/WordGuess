@@ -15,12 +15,27 @@ android {
         versionName = "1.0"
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("../release.keystore")
+            storePassword = System.getenv("KEYSTORE_PASSWORD") ?: "wordguess123"
+            keyAlias = System.getenv("KEY_ALIAS") ?: "wordguess"
+            keyPassword = System.getenv("KEY_PASSWORD") ?: "wordguess123"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
+        debug {
+            // Для отладки используем ту же подпись, чтобы не переустанавливать приложение
+            signingConfig = signingConfigs.getByName("release")
+        }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
