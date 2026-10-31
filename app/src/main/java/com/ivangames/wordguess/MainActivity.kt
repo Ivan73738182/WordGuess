@@ -18,97 +18,120 @@ class MainActivity : AppCompatActivity() {
 
     private var currentLevel = 0
 
+    // ВСЕ 20 УРОВНЕЙ (Плотная сетка, без дырок)
     private val levels = listOf(
+        // 1. КОТ
         Level(listOf('К', 'О', 'Т'), listOf(
             CrosswordView.WordPlacement("КОТ", 1, 1, true),
             CrosswordView.WordPlacement("ТОК", 3, 1, false)
         )),
+        // 2. РАК
         Level(listOf('Р', 'А', 'К'), listOf(
             CrosswordView.WordPlacement("РАК", 1, 1, true),
             CrosswordView.WordPlacement("КАР", 3, 1, false)
         )),
+        // 3. СОН
         Level(listOf('С', 'О', 'Н'), listOf(
             CrosswordView.WordPlacement("СОН", 1, 1, true),
             CrosswordView.WordPlacement("НОС", 3, 1, false)
         )),
+        // 4. РУКА
         Level(listOf('Р', 'У', 'К', 'А'), listOf(
-            CrosswordView.WordPlacement("РУКА", 1, 2, true),
-            CrosswordView.WordPlacement("РАК", 1, 2, false),
-            CrosswordView.WordPlacement("УРА", 2, 1, false)
+            CrosswordView.WordPlacement("РУКА", 1, 1, true),  // Горизонтально
+            CrosswordView.WordPlacement("РАК", 1, 1, false),  // Вертикально от Р (1,1)
+            CrosswordView.WordPlacement("УРА", 2, 1, false)   // Вертикально от У (2,1)
         )),
+        // 5. МАКО
         Level(listOf('М', 'А', 'К', 'О'), listOf(
-            CrosswordView.WordPlacement("МАКО", 1, 2, true),
-            CrosswordView.WordPlacement("МАК", 1, 2, false),
-            CrosswordView.WordPlacement("КОМА", 2, 1, false)
+            CrosswordView.WordPlacement("МАКО", 1, 1, true),
+            CrosswordView.WordPlacement("МАК", 1, 1, false),
+            CrosswordView.WordPlacement("КОМА", 3, 1, false)
         )),
+        // 6. ЛИСА
         Level(listOf('Л', 'И', 'С', 'А'), listOf(
-            CrosswordView.WordPlacement("ЛИСА", 1, 2, true),
-            CrosswordView.WordPlacement("СИЛА", 2, 1, false),
-            CrosswordView.WordPlacement("ЛИС", 1, 2, false)
+            CrosswordView.WordPlacement("ЛИСА", 1, 1, true),
+            CrosswordView.WordPlacement("СИЛА", 3, 1, false),
+            CrosswordView.WordPlacement("ЛИС", 1, 1, false)
         )),
+        // 7. ЗИМА
         Level(listOf('З', 'И', 'М', 'А'), listOf(
             CrosswordView.WordPlacement("ЗИМА", 1, 1, true),
             CrosswordView.WordPlacement("ЗИМ", 1, 1, false)
         )),
+        // 8. ГОРА
         Level(listOf('Г', 'О', 'Р', 'А'), listOf(
             CrosswordView.WordPlacement("ГОРА", 1, 1, true),
-            CrosswordView.WordPlacement("РОГ", 2, 1, false)
+            CrosswordView.WordPlacement("РОГ", 3, 1, false)
         )),
+        // 9. СЛОН
         Level(listOf('С', 'Л', 'О', 'Н'), listOf(
-            CrosswordView.WordPlacement("СЛОН", 1, 2, true),
+            CrosswordView.WordPlacement("СЛОН", 1, 1, true),
             CrosswordView.WordPlacement("НОС", 3, 1, false),
             CrosswordView.WordPlacement("СОН", 1, 1, false)
         )),
+        // 10. ВОДА
         Level(listOf('В', 'О', 'Д', 'А'), listOf(
             CrosswordView.WordPlacement("ВОДА", 1, 1, true),
             CrosswordView.WordPlacement("ВОД", 1, 1, false)
         )),
+        
+        // 11. КУКЛА
         Level(listOf('К', 'У', 'К', 'Л', 'А'), listOf(
-            CrosswordView.WordPlacement("КУКЛА", 1, 2, true),
-            CrosswordView.WordPlacement("ЛУК", 3, 1, false),
+            CrosswordView.WordPlacement("КУКЛА", 1, 1, true),
+            CrosswordView.WordPlacement("ЛУК", 4, 1, false),
             CrosswordView.WordPlacement("КУЛАК", 1, 1, false)
         )),
+        // 12. ПЕНАЛ
         Level(listOf('П', 'Е', 'Н', 'А', 'Л'), listOf(
-            CrosswordView.WordPlacement("ПЕНАЛ", 1, 2, true),
+            CrosswordView.WordPlacement("ПЕНАЛ", 1, 1, true),
             CrosswordView.WordPlacement("ПЕНА", 1, 1, false),
             CrosswordView.WordPlacement("ЛЕН", 4, 1, false)
         )),
+        // 13. ТОЧКА
         Level(listOf('Т', 'О', 'Ч', 'К', 'А'), listOf(
-            CrosswordView.WordPlacement("ТОЧКА", 1, 2, true),
+            CrosswordView.WordPlacement("ТОЧКА", 1, 1, true),
             CrosswordView.WordPlacement("ТОК", 1, 1, false),
-            CrosswordView.WordPlacement("КОТ", 3, 2, false)
+            CrosswordView.WordPlacement("КОТ", 4, 1, false)
         )),
+        // 14. СТЕНА
         Level(listOf('С', 'Т', 'Е', 'Н', 'А'), listOf(
-            CrosswordView.WordPlacement("СТЕНА", 1, 2, true),
+            CrosswordView.WordPlacement("СТЕНА", 1, 1, true),
             CrosswordView.WordPlacement("СЕТ", 1, 1, false),
-            CrosswordView.WordPlacement("СТЕН", 1, 2, false)
+            CrosswordView.WordPlacement("СТЕН", 1, 1, false)
         )),
+        // 15. КАРТА
         Level(listOf('К', 'А', 'Р', 'Т', 'А'), listOf(
-            CrosswordView.WordPlacement("КАРТА", 1, 2, true),
-            CrosswordView.WordPlacement("КАРТ", 1, 2, false),
+            CrosswordView.WordPlacement("КАРТА", 1, 1, true),
+            CrosswordView.WordPlacement("КАРТ", 1, 1, false),
             CrosswordView.WordPlacement("РАК", 2, 1, false)
         )),
+        
+        // 16. МАСКА
         Level(listOf('М', 'А', 'С', 'К', 'А'), listOf(
-            CrosswordView.WordPlacement("МАСКА", 1, 2, true),
+            CrosswordView.WordPlacement("МАСКА", 1, 1, true),
             CrosswordView.WordPlacement("МАК", 1, 1, false),
             CrosswordView.WordPlacement("КАСКА", 3, 1, false)
         )),
+        // 17. РУЧКА
         Level(listOf('Р', 'У', 'Ч', 'К', 'А'), listOf(
-            CrosswordView.WordPlacement("РУЧКА", 1, 2, true),
+            CrosswordView.WordPlacement("РУЧКА", 1, 1, true),
             CrosswordView.WordPlacement("РУКА", 1, 1, false),
-            CrosswordView.WordPlacement("РАК", 4, 1, false)
+            CrosswordView.WordPlacement("РАК", 5, 1, false)
         )),
+        // 18. ПЕЧКА
         Level(listOf('П', 'Е', 'Ч', 'К', 'А'), listOf(
-            CrosswordView.WordPlacement("ПЕЧКА", 1, 2, true),
+            CrosswordView.WordPlacement("ПЕЧКА", 1, 1, true),
             CrosswordView.WordPlacement("ПЕЧЬ", 1, 1, false),
-            CrosswordView.WordPlacement("РАК", 4, 1, false)
+            CrosswordView.WordPlacement("РАК", 5, 1, false)
         )),
+        // 19. ГРУША
         Level(listOf('Г', 'Р', 'У', 'Ш', 'А'), listOf(
-            CrosswordView.WordPlacement("ГРУША", 1, 2, true),
+            CrosswordView.WordPlacement("ГРУША", 1, 1, true),
             CrosswordView.WordPlacement("ГРУШ", 1, 1, false)
         )),
+        // 20. ШКОЛА
         Level(listOf('Ш', 'К', 'О', 'Л', 'А'), listOf(
-            CrosswordView.WordPlacement("ШКОЛА", 1, 2, true),
+            CrosswordView.WordPlacement("ШКОЛА", 1, 1, true),
             CrosswordView.WordPlacement("ШКОЛ", 1, 1, false),
             CrosswordView.WordPlacement("КОЛ", 2, 1, false)
         ))
