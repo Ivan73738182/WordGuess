@@ -43,10 +43,7 @@ class CrosswordView @JvmOverloads constructor(
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
-        // Увеличили клетки (делим на 6)
         cellSize = Math.min(w, h) / 6f
-        
-        // Центрируем сетку
         offsetX = (w - cellSize * 5) / 2f
         offsetY = (h - cellSize * 5) / 2f
     }
