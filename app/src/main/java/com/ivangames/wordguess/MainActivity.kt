@@ -1,7 +1,9 @@
 package com.ivangames.wordguess
 
-import android.app.AlertDialog
+import android.app.Dialog
 import android.os.Bundle
+import android.view.Window
+import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -59,7 +61,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun loadLevel(levelIndex: Int) {
         if (levelIndex >= levels.size) {
-            // Если уровни кончились
             tvCurrentWord.text = "Все уровни пройдены!"
             return
         }
@@ -74,7 +75,7 @@ class MainActivity : AppCompatActivity() {
         letterCircle.letters = level.letters
         crosswordView.words = level.words
         
-        // Сбрасываем сетку перед загрузкой (нужно добавить метод в CrosswordView)
+        // Сбрасываем сетку перед загрузкой
         crosswordView.reset()
 
         tvCurrentWord.text = "Уровень ${levelIndex + 1}"
@@ -100,15 +101,24 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showWinDialog(currentLevelIndex: Int) {
-        AlertDialog.Builder(this)
-            .setTitle("Уровень пройден! 🎉")
-            .setMessage("Молодец! Идем дальше?")
-            .setPositiveButton("Продолжить") { _, _ ->
-                currentLevel++
-                loadLevel(currentLevel)
-            }
-            .setCancelable(false)
-            .show()
+        // Создаем кастомный диалог
+        val dialog = Dialog(this)
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog.setContentView(R.layout.dialog_win)
+        
+        // Делаем фон прозрачным, чтобы были видны скругления
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        
+        // Кнопка "Продолжить"
+        val btnContinue = dialog.findViewById<Button>(R.id.btnContinue)
+        btnContinue.setOnClickListener {
+            dialog.dismiss()
+            currentLevel++
+            loadLevel(currentLevel)
+        }
+        
+        dialog.setCancelable(false)
+        dialog.show()
     }
 
     // Класс для уровня
