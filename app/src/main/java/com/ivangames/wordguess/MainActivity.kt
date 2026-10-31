@@ -20,11 +20,17 @@ class MainActivity : AppCompatActivity() {
             CrosswordView.WordPlacement("ТОК", 2, 0, false)
         )
 
+        val validWords = setOf("КОТ", "ТОК")
+
         letterCircle.onWordCompleted = { word ->
             tvCurrentWord.text = "Собрано: $word"
             
-            if (word == "КОТ" || word == "ТОК") {
+            // Если слово правильное - ВПИСЫВАЕМ В СЕТКУ
+            if (validWords.contains(word)) {
                 crosswordView.addGuessedWord(word)
+                tvCurrentWord.text = "Отлично! $word"
+            } else {
+                tvCurrentWord.text = "Не угадал: $word"
             }
         }
     }

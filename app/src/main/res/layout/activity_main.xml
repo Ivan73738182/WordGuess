@@ -31,23 +31,23 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Сетка: высота 0.4 (40% экрана) -->
+    <!-- Увеличили сетку до 0.45 -->
     <com.ivangames.wordguess.CrosswordView
         android:id="@+id/crosswordView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="10dp"
-        app:layout_constraintHeight_percent="0.4"
+        app:layout_constraintHeight_percent="0.45"
         app:layout_constraintTop_toBottomOf="@id/tvCurrentWord"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Круг: снизу, ограничен по высоте 0.4 (40% экрана) -->
+    <!-- Круг снизу -->
     <com.ivangames.wordguess.LetterCircleView
         android:id="@+id/letterCircle"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintHeight_percent="0.4"
+        app:layout_constraintHeight_percent="0.45"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

@@ -43,10 +43,10 @@ class CrosswordView @JvmOverloads constructor(
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
-        // УМЕНЬШИЛИ КЛЕТКИ (/ 8f), чтобы сетка не была огромной
-        cellSize = Math.min(w, h) / 8f
+        // Увеличили клетки (делим на 6)
+        cellSize = Math.min(w, h) / 6f
         
-        // Центрируем сетку (примерно на глаз, по 5 клеткам в ряд)
+        // Центрируем сетку
         offsetX = (w - cellSize * 5) / 2f
         offsetY = (h - cellSize * 5) / 2f
     }
@@ -63,7 +63,6 @@ class CrosswordView @JvmOverloads constructor(
                 val left = offsetX + x * cellSize
                 val top = offsetY + y * cellSize
                 
-                // Чуть меньше зазоры, чтобы сетка смотрелась плотнее
                 rect.set(left + 4f, top + 4f, left + cellSize - 4f, top + cellSize - 4f)
 
                 val key = "$x,$y"

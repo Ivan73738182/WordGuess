@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
@@ -24,13 +25,13 @@ class LetterCircleView @JvmOverloads constructor(
 
     private val textPaintNormal = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#1976D2")
-        textSize = 110f // УВЕЛИЧИЛИ БУКВЫ
+        textSize = 100f
         textAlign = Paint.Align.CENTER
         isFakeBoldText = true
     }
     private val textPaintActive = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#FFC107")
-        textSize = 110f
+        textSize = 100f
         textAlign = Paint.Align.CENTER
         isFakeBoldText = true
     }
@@ -53,21 +54,33 @@ class LetterCircleView @JvmOverloads constructor(
         strokeWidth = 10f
     }
 
+    // Кнопка "перемешать"
+    private val shuffleBtnPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#1976D2")
+        style = Paint.Style.FILL
+    }
+    private val shuffleIconPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.WHITE
+        strokeWidth = 8f
+        style = Paint.Style.STROKE
+    }
+
     private var centerX = 0f
     private var centerY = 0f
     private var bgRadius = 0f
-    private var letterRadius = 80f 
+    private var letterRadius = 75f 
+    private val shuffleRadius = 80f
     private var positions = mutableListOf<Pair<Float, Float>>()
     
     private val selectedIndices = mutableListOf<Int>()
     private var currentX = 0f
     private var currentY = 0f
+    private var isShuffleClicked = false
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
         centerX = w / 2f
         centerY = h / 2f
-        // ЖЕСТКО ОГРАНИЧИЛИ РАДИУС КРУГА, ЧТОБЫ ОН НЕ БЫЛ ГИГАНТСКИМ
         bgRadius = Math.min(w, h) / 2.5f 
         calculatePositions()
     }
@@ -77,7 +90,7 @@ class LetterCircleView @JvmOverloads constructor(
         val count = letters.size
         if (count == 0) return
         
-        val radius = bgRadius - letterRadius
+        val radius = bgRadius - letterRadius - 20f
         val angleStep = (2 * Math.PI / count).toFloat()
         val startAngle = -Math.PI.toFloat() / 2 
 
@@ -94,6 +107,15 @@ class LetterCircleView @JvmOverloads constructor(
         
         canvas.drawCircle(centerX, centerY, bgRadius, bgPaint)
 
+        // Кнопка перемешивания (центр)
+        canvas.drawCircle(centerX, centerY, shuffleRadius, shuffleBtnPaint)
+        
+        // Иконка "крест-накрест" (как перемешивание)
+        val iconOffset = 30f
+        canvas.drawLine(centerX - iconOffset, centerY - iconOffset, centerX + iconOffset, centerY + iconOffset, shuffleIconPaint)
+        canvas.drawLine(centerX - iconOffset, centerY + iconOffset, centerX + iconOffset, centerY - iconOffset, shuffleIconPaint)
+
+        // Линии свайпа
         for (i in 0 until selectedIndices.size - 1) {
             val p1 = positions[selectedIndices[i]]
             val p2 = positions[selectedIndices[i + 1]]
@@ -104,6 +126,7 @@ class LetterCircleView @JvmOverloads constructor(
             canvas.drawLine(lastP.first, lastP.second, currentX, currentY, swipeLinePaint)
         }
 
+        // Буквы
         for (i in letters.indices) {
             val pos = positions[i]
             val isSelected = selectedIndices.contains(i)
@@ -124,20 +147,32 @@ class LetterCircleView @JvmOverloads constructor(
 
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
+                // Проверка нажатия на кнопку перемешивания
+                val distToShuffle = Math.hypot((event.x - centerX).toDouble(), (event.y - centerY).toDouble()).toFloat()
+                if (distToShuffle < shuffleRadius) {
+                    isShuffleClicked = true
+                    letters = letters.shuffled()
+                    invalidate()
+                    return true
+                }
+                
                 selectedIndices.clear()
                 checkTouch(event.x, event.y)
             }
             MotionEvent.ACTION_MOVE -> {
-                checkTouch(event.x, event.y)
+                if (!isShuffleClicked) {
+                    checkTouch(event.x, event.y)
+                }
             }
             MotionEvent.ACTION_UP -> {
-                if (selectedIndices.isNotEmpty()) {
+                if (!isShuffleClicked && selectedIndices.isNotEmpty()) {
                     val word = selectedIndices.map { letters[it] }.joinToString("")
                     onWordCompleted?.invoke(word)
                 }
                 selectedIndices.clear()
                 currentX = 0f
                 currentY = 0f
+                isShuffleClicked = false
             }
         }
         invalidate()
