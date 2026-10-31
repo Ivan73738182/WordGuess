@@ -22,20 +22,17 @@ class CrosswordView @JvmOverloads constructor(
 
     private val guessedLetters = mutableMapOf<String, Char>()
 
-    // Светло-голубые пустые клетки
     private val cellPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#B3D4F0") 
         style = Paint.Style.FILL
     }
-    // Темно-синие угаданные клетки
     private val cellGuessedPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#1976D2")
         style = Paint.Style.FILL
     }
-    // Белый текст для букв
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
-        textSize = 70f
+        textSize = 80f
         textAlign = Paint.Align.CENTER
         isFakeBoldText = true
     }
@@ -46,7 +43,10 @@ class CrosswordView @JvmOverloads constructor(
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
-        cellSize = Math.min(w, h) / 6f
+        // УМЕНЬШИЛИ КЛЕТКИ (/ 8f), чтобы сетка не была огромной
+        cellSize = Math.min(w, h) / 8f
+        
+        // Центрируем сетку (примерно на глаз, по 5 клеткам в ряд)
         offsetX = (w - cellSize * 5) / 2f
         offsetY = (h - cellSize * 5) / 2f
     }
@@ -63,20 +63,18 @@ class CrosswordView @JvmOverloads constructor(
                 val left = offsetX + x * cellSize
                 val top = offsetY + y * cellSize
                 
-                // Отступы по 6f с каждой стороны (зазоры)
-                rect.set(left + 6f, top + 6f, left + cellSize - 6f, top + cellSize - 6f)
+                // Чуть меньше зазоры, чтобы сетка смотрелась плотнее
+                rect.set(left + 4f, top + 4f, left + cellSize - 4f, top + cellSize - 4f)
 
                 val key = "$x,$y"
                 
                 if (guessedLetters.containsKey(key)) {
-                    // Темно-синяя клетка с белой буквой
-                    canvas.drawRoundRect(rect, 15f, 15f, cellGuessedPaint)
+                    canvas.drawRoundRect(rect, 12f, 12f, cellGuessedPaint)
                     val char = guessedLetters[key]!!
                     val textY = top + cellSize / 2 - (textPaint.descent() + textPaint.ascent()) / 2
                     canvas.drawText(char.toString(), left + cellSize / 2, textY, textPaint)
                 } else {
-                    // Светло-голубая пустая клетка
-                    canvas.drawRoundRect(rect, 15f, 15f, cellPaint)
+                    canvas.drawRoundRect(rect, 12f, 12f, cellPaint)
                 }
             }
         }
