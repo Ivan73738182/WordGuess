@@ -20,7 +20,6 @@ class CrosswordView @JvmOverloads constructor(
             invalidate()
         }
 
-    // Множество угаданных слов
     private val guessedWords = mutableSetOf<String>()
 
     private val cellPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -53,6 +52,7 @@ class CrosswordView @JvmOverloads constructor(
         super.onDraw(canvas)
         val rect = RectF()
 
+        // ПРОХОД 1: Рисуем ВСЕ пустые клетки
         for (word in words) {
             for (i in word.word.indices) {
                 val x = if (word.isHorizontal) word.startX + i else word.startX
@@ -62,21 +62,31 @@ class CrosswordView @JvmOverloads constructor(
                 val top = offsetY + y * cellSize
                 
                 rect.set(left + 4f, top + 4f, left + cellSize - 4f, top + cellSize - 4f)
+                canvas.drawRoundRect(rect, 12f, 12f, cellPaint)
+            }
+        }
 
-                if (guessedWords.contains(word.word)) {
+        // ПРОХОД 2: Рисуем ВСЕ угаданные клетки с буквами ПОВЕРХ пустых
+        for (word in words) {
+            if (guessedWords.contains(word.word)) {
+                for (i in word.word.indices) {
+                    val x = if (word.isHorizontal) word.startX + i else word.startX
+                    val y = if (word.isHorizontal) word.startY else word.startY + i
+                    
+                    val left = offsetX + x * cellSize
+                    val top = offsetY + y * cellSize
+                    
+                    rect.set(left + 4f, top + 4f, left + cellSize - 4f, top + cellSize - 4f)
                     canvas.drawRoundRect(rect, 12f, 12f, cellGuessedPaint)
-                    // Рисуем букву из слова
+                    
                     val char = word.word[i]
                     val textY = top + cellSize / 2 - (textPaint.descent() + textPaint.ascent()) / 2
                     canvas.drawText(char.toString(), left + cellSize / 2, textY, textPaint)
-                } else {
-                    canvas.drawRoundRect(rect, 12f, 12f, cellPaint)
                 }
             }
         }
     }
 
-    // Добавляем слово целиком в список угаданных
     fun addGuessedWord(word: String) {
         if (words.any { it.word == word }) {
             guessedWords.add(word)
