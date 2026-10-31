@@ -1,0 +1,8 @@
+<resources>
+    <style name="Theme.WordGuess" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#1976D2</item>
+        <item name="colorPrimaryVariant">#115293</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="android:statusBarColor">#1976D2</item>
+    </style>
+</resources>
