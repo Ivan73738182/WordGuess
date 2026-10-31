@@ -7,6 +7,8 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
@@ -72,10 +74,9 @@ class MainActivity : AppCompatActivity() {
 
         val level = levels[levelIndex]
         rootLayout.setBackgroundResource(backgrounds[Random.nextInt(backgrounds.size)])
-
         letterCircle.letters = level.letters
 
-        // Безопасная генерация
+        // Генерируем координаты и центрируем сетку
         val placements = generatePlacements(level.words)
         crosswordView.words = placements
         crosswordView.reset()
@@ -104,39 +105,50 @@ class MainActivity : AppCompatActivity() {
         val placements = mutableListOf<CrosswordView.WordPlacement>()
         if (words.isEmpty()) return placements
 
-        // Первое слово ставим горизонтально
         val firstWord = words[0]
-        // Сдвигаем на 2 клетки от левого края, чтобы было место для вертикальных слов
-        placements.add(CrosswordView.WordPlacement(firstWord, 1, 1, true)) 
-        
+        // Начинаем с (0,0)
+        placements.add(CrosswordView.WordPlacement(firstWord, 0, 0, true))
+
         for (i in 1 until words.size) {
             val word = words[i]
             var placed = false
             
-            // Пытаемся найти общую букву с первым словом
             for (j in firstWord.indices) {
                 val char = firstWord[j]
                 val indexInWord = word.indexOf(char)
                 if (indexInWord != -1) {
-                    // Проверяем, не уйдет ли слово в отрицательную зону
-                    val startX = 1 + j // координата X первой буквы первого слова + индекс
-                    val startY = 1 - indexInWord // координата Y
+                    val startX = j
+                    val startY = -indexInWord // Считаем относительно (0,0)
                     
-                    if (startY >= 0) {
-                        placements.add(CrosswordView.WordPlacement(word, startX, startY, false))
-                        placed = true
-                        break
-                    }
+                    // ВАЖНО: Проверяем, что слово не выйдет за пределы сверху или слева
+                    // Если Y отрицательный, значит слово пойдет вверх (это нормально, мы потом сдвинем всю сетку)
+                    placements.add(CrosswordView.WordPlacement(word, startX, startY, false))
+                    placed = true
+                    break
                 }
             }
             
-            // Если не нашли пересечение ИЛИ слово ушло в минус, ставим его отдельно
+            // Если не нашли пересечение - ставим в отдельную зону (например, на 3 клетки правее)
             if (!placed) {
-                // Ставим вертикально справа (безопасная зона)
-                placements.add(CrosswordView.WordPlacement(word, 5, 1, false)) 
+                placements.add(CrosswordView.WordPlacement(word, firstWord.length + 1, 0, true))
             }
         }
-        return placements
+        
+        // Теперь вычисляем минимальные X и Y, чтобы сдвинуть всю сетку вправо и вниз (в центр экрана)
+        var minX = Int.MAX_VALUE
+        var minY = Int.MAX_VALUE
+        for (p in placements) {
+            minX = min(minX, p.startX)
+            minY = min(minY, p.startY)
+        }
+        
+        // Сдвигаем все слова, чтобы они не уходили в минус
+        val shiftX = -minX
+        val shiftY = -minY
+        
+        return placements.map {
+            it.copy(startX = it.startX + shiftX, startY = it.startY + shiftY)
+        }
     }
 
     private fun showWinDialog(currentLevelIndex: Int) {
