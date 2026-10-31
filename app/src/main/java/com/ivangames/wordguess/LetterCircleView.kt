@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
@@ -54,14 +53,13 @@ class LetterCircleView @JvmOverloads constructor(
         strokeWidth = 10f
     }
 
-    // Кнопка "перемешать"
     private val shuffleBtnPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#1976D2")
         style = Paint.Style.FILL
     }
     private val shuffleIconPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
-        strokeWidth = 8f
+        strokeWidth = 6f // Сделали линии иконки чуть тоньше
         style = Paint.Style.STROKE
     }
 
@@ -69,7 +67,10 @@ class LetterCircleView @JvmOverloads constructor(
     private var centerY = 0f
     private var bgRadius = 0f
     private var letterRadius = 75f 
-    private val shuffleRadius = 80f
+    
+    // УМЕНЬШИЛИ РАДИУС КНОПКИ (было 80f, стало 50f)
+    private val shuffleRadius = 50f 
+    
     private var positions = mutableListOf<Pair<Float, Float>>()
     
     private val selectedIndices = mutableListOf<Int>()
@@ -110,8 +111,8 @@ class LetterCircleView @JvmOverloads constructor(
         // Кнопка перемешивания (центр)
         canvas.drawCircle(centerX, centerY, shuffleRadius, shuffleBtnPaint)
         
-        // Иконка "крест-накрест" (как перемешивание)
-        val iconOffset = 30f
+        // Иконка "крест-накрест" (уменьшили отступ для маленькой кнопки)
+        val iconOffset = 20f 
         canvas.drawLine(centerX - iconOffset, centerY - iconOffset, centerX + iconOffset, centerY + iconOffset, shuffleIconPaint)
         canvas.drawLine(centerX - iconOffset, centerY + iconOffset, centerX + iconOffset, centerY - iconOffset, shuffleIconPaint)
 
@@ -147,7 +148,6 @@ class LetterCircleView @JvmOverloads constructor(
 
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
-                // Проверка нажатия на кнопку перемешивания
                 val distToShuffle = Math.hypot((event.x - centerX).toDouble(), (event.y - centerY).toDouble()).toFloat()
                 if (distToShuffle < shuffleRadius) {
                     isShuffleClicked = true
