@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout 
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#1976D2">
@@ -31,7 +32,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Увеличили сетку до 0.45 -->
     <com.ivangames.wordguess.CrosswordView
         android:id="@+id/crosswordView"
         android:layout_width="match_parent"
@@ -42,7 +42,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Круг снизу -->
     <com.ivangames.wordguess.LetterCircleView
         android:id="@+id/letterCircle"
         android:layout_width="match_parent"

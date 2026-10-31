@@ -1,27 +1,86 @@
 package com.ivangames.wordguess
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
+import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var letterCircle: LetterCircleView
+    private lateinit var crosswordView: CrosswordView
+    private lateinit var tvCurrentWord: TextView
+    private lateinit var rootLayout: ConstraintLayout
+
+    // Текущий уровень
+    private var currentLevel = 0
+
+    // База данных уровней (пока 2 уровня для теста)
+    private val levels = listOf(
+        // Уровень 1
+        Level(
+            letters = listOf('К', 'О', 'Т'),
+            words = listOf(
+                CrosswordView.WordPlacement("КОТ", 0, 0, true),
+                CrosswordView.WordPlacement("ТОК", 2, 0, false)
+            )
+        ),
+        // Уровень 2
+        Level(
+            letters = listOf('Р', 'А', 'К'),
+            words = listOf(
+                CrosswordView.WordPlacement("РАК", 0, 0, true),
+                CrosswordView.WordPlacement("КАР", 2, 0, false)
+            )
+        )
+    )
+
+    // Список всех фонов
+    private val backgrounds = listOf(
+        R.drawable.bg_autumn,
+        R.drawable.bg_forest,
+        R.drawable.bg_mountains,
+        R.drawable.bg_beach
+    )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val letterCircle = findViewById<LetterCircleView>(R.id.letterCircle)
-        val crosswordView = findViewById<CrosswordView>(R.id.crosswordView)
-        val tvCurrentWord = findViewById<TextView>(R.id.tvCurrentWord)
+        rootLayout = findViewById(R.id.rootLayout)
+        letterCircle = findViewById(R.id.letterCircle)
+        crosswordView = findViewById(R.id.crosswordView)
+        tvCurrentWord = findViewById(R.id.tvCurrentWord)
 
-        letterCircle.letters = listOf('К', 'О', 'Т')
+        loadLevel(currentLevel)
+    }
 
-        val levelWords = listOf(
-            CrosswordView.WordPlacement("КОТ", 0, 0, true),
-            CrosswordView.WordPlacement("ТОК", 2, 0, false)
-        )
-        crosswordView.words = levelWords
+    private fun loadLevel(levelIndex: Int) {
+        if (levelIndex >= levels.size) {
+            // Если уровни кончились
+            tvCurrentWord.text = "Все уровни пройдены!"
+            return
+        }
 
-        val validWords = levelWords.map { it.word }.toSet()
+        val level = levels[levelIndex]
+        
+        // 1. Ставим рандомный фон
+        val randomBg = backgrounds[Random.nextInt(backgrounds.size)]
+        rootLayout.setBackgroundResource(randomBg)
+
+        // 2. Загружаем буквы и слова
+        letterCircle.letters = level.letters
+        crosswordView.words = level.words
+        
+        // Сбрасываем сетку перед загрузкой (нужно добавить метод в CrosswordView)
+        crosswordView.reset()
+
+        tvCurrentWord.text = "Уровень ${levelIndex + 1}"
+
+        // 3. Логика проверки слов
+        val validWords = level.words.map { it.word }.toSet()
 
         letterCircle.onWordCompleted = { word ->
             tvCurrentWord.text = "Собрано: $word"
@@ -29,9 +88,32 @@ class MainActivity : AppCompatActivity() {
             if (validWords.contains(word)) {
                 crosswordView.addGuessedWord(word)
                 tvCurrentWord.text = "Отлично! $word"
+                
+                // Проверяем, все ли слова собраны
+                if (crosswordView.isLevelComplete()) {
+                    showWinDialog(levelIndex)
+                }
             } else {
                 tvCurrentWord.text = "Не угадал: $word"
             }
         }
     }
+
+    private fun showWinDialog(currentLevelIndex: Int) {
+        AlertDialog.Builder(this)
+            .setTitle("Уровень пройден! 🎉")
+            .setMessage("Молодец! Идем дальше?")
+            .setPositiveButton("Продолжить") { _, _ ->
+                currentLevel++
+                loadLevel(currentLevel)
+            }
+            .setCancelable(false)
+            .show()
+    }
+
+    // Класс для уровня
+    data class Level(
+        val letters: List<Char>,
+        val words: List<CrosswordView.WordPlacement>
+    )
 }
