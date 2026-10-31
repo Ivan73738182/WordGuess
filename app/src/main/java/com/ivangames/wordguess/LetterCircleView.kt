@@ -17,6 +17,8 @@ class LetterCircleView @JvmOverloads constructor(
     var letters: List<Char> = listOf('К', 'О', 'Т')
         set(value) {
             field = value
+            // ВАЖНО: Пересчитываем позиции, когда меняются буквы!
+            calculatePositions()
             invalidate()
         }
 
@@ -59,7 +61,7 @@ class LetterCircleView @JvmOverloads constructor(
     }
     private val shuffleIconPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
-        strokeWidth = 6f // Сделали линии иконки чуть тоньше
+        strokeWidth = 6f
         style = Paint.Style.STROKE
     }
 
@@ -67,8 +69,6 @@ class LetterCircleView @JvmOverloads constructor(
     private var centerY = 0f
     private var bgRadius = 0f
     private var letterRadius = 75f 
-    
-    // УМЕНЬШИЛИ РАДИУС КНОПКИ (было 80f, стало 50f)
     private val shuffleRadius = 50f 
     
     private var positions = mutableListOf<Pair<Float, Float>>()
@@ -91,14 +91,19 @@ class LetterCircleView @JvmOverloads constructor(
         val count = letters.size
         if (count == 0) return
         
-        val radius = bgRadius - letterRadius - 20f
+        // Если размеры еще не известны (0), используем дефолтные для расчета
+        val cx = if (centerX == 0f) 500f else centerX
+        val cy = if (centerY == 0f) 500f else centerY
+        val bgRad = if (bgRadius == 0f) 300f else bgRadius
+
+        val radius = bgRad - letterRadius - 20f
         val angleStep = (2 * Math.PI / count).toFloat()
         val startAngle = -Math.PI.toFloat() / 2 
 
         for (i in 0 until count) {
             val angle = startAngle + i * angleStep
-            val x = centerX + radius * cos(angle)
-            val y = centerY + radius * sin(angle)
+            val x = cx + radius * cos(angle)
+            val y = cy + radius * sin(angle)
             positions.add(Pair(x, y))
         }
     }
@@ -108,15 +113,12 @@ class LetterCircleView @JvmOverloads constructor(
         
         canvas.drawCircle(centerX, centerY, bgRadius, bgPaint)
 
-        // Кнопка перемешивания (центр)
         canvas.drawCircle(centerX, centerY, shuffleRadius, shuffleBtnPaint)
         
-        // Иконка "крест-накрест" (уменьшили отступ для маленькой кнопки)
         val iconOffset = 20f 
         canvas.drawLine(centerX - iconOffset, centerY - iconOffset, centerX + iconOffset, centerY + iconOffset, shuffleIconPaint)
         canvas.drawLine(centerX - iconOffset, centerY + iconOffset, centerX + iconOffset, centerY - iconOffset, shuffleIconPaint)
 
-        // Линии свайпа
         for (i in 0 until selectedIndices.size - 1) {
             val p1 = positions[selectedIndices[i]]
             val p2 = positions[selectedIndices[i + 1]]
@@ -127,8 +129,10 @@ class LetterCircleView @JvmOverloads constructor(
             canvas.drawLine(lastP.first, lastP.second, currentX, currentY, swipeLinePaint)
         }
 
-        // Буквы
+        // ЗАЩИТА: если позиций меньше, чем букв, просто не рисуем лишние
         for (i in letters.indices) {
+            if (i >= positions.size) break
+            
             val pos = positions[i]
             val isSelected = selectedIndices.contains(i)
             
