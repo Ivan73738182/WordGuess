@@ -16,30 +16,41 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvCurrentWord: TextView
     private lateinit var rootLayout: ConstraintLayout
 
-    // Текущий уровень
     private var currentLevel = 0
 
-    // База данных уровней (пока 2 уровня для теста)
+    // Список 20 уровней
     private val levels = listOf(
-        // Уровень 1
-        Level(
-            letters = listOf('К', 'О', 'Т'),
-            words = listOf(
-                CrosswordView.WordPlacement("КОТ", 0, 0, true),
-                CrosswordView.WordPlacement("ТОК", 2, 0, false)
-            )
-        ),
-        // Уровень 2
-        Level(
-            letters = listOf('Р', 'А', 'К'),
-            words = listOf(
-                CrosswordView.WordPlacement("РАК", 0, 0, true),
-                CrosswordView.WordPlacement("КАР", 2, 0, false)
-            )
-        )
+        // 1-3: 3 буквы
+        Level(listOf('К', 'О', 'Т'), listOf("КОТ", "ТОК")),
+        Level(listOf('Р', 'А', 'К'), listOf("РАК", "КАР")),
+        Level(listOf('С', 'О', 'Н'), listOf("СОН", "НОС")),
+        
+        // 4-6: 4 буквы (простые)
+        Level(listOf('Р', 'У', 'К', 'А'), listOf("РУКА", "РАК", "УРА")),
+        Level(listOf('М', 'А', 'К', 'О'), listOf("МАКО", "КОМА", "МАК")),
+        Level(listOf('Л', 'И', 'С', 'А'), listOf("ЛИСА", "СИЛА", "ЛИС")),
+        
+        // 7-10: 4 буквы (сложнее)
+        Level(listOf('З', 'И', 'М', 'А'), listOf("ЗИМА", "ЗИМ")),
+        Level(listOf('Г', 'О', 'Р', 'А'), listOf("ГОРА", "РОГ")),
+        Level(listOf('С', 'Л', 'О', 'Н'), listOf("СЛОН", "НОС", "СОН")),
+        Level(listOf('В', 'О', 'Д', 'А'), listOf("ВОДА", "ВОД")),
+        
+        // 11-15: 5 букв (средние)
+        Level(listOf('К', 'У', 'К', 'Л', 'А'), listOf("КУКЛА", "ЛУК", "КУЛАК")),
+        Level(listOf('П', 'Е', 'Н', 'А', 'Л'), listOf("ПЕНАЛ", "ПЕНА", "ЛЕН")),
+        Level(listOf('Т', 'О', 'Ч', 'К', 'А'), listOf("ТОЧКА", "ТОК", "КОТ")),
+        Level(listOf('С', 'Т', 'Е', 'Н', 'А'), listOf("СТЕНА", "СЕТ", "СТЕН")),
+        Level(listOf('К', 'А', 'Р', 'Т', 'А'), listOf("КАРТА", "КАРТ", "РАК")),
+        
+        // 16-20: 5 букв (сложные)
+        Level(listOf('М', 'А', 'С', 'К', 'А'), listOf("МАСКА", "МАК", "КАСКА")),
+        Level(listOf('Р', 'У', 'Ч', 'К', 'А'), listOf("РУЧКА", "РУКА", "РАК")),
+        Level(listOf('П', 'Е', 'Ч', 'К', 'А'), listOf("ПЕЧКА", "ПЕЧЬ", "РАК")),
+        Level(listOf('Г', 'Р', 'У', 'Ш', 'А'), listOf("ГРУША", "ГРУШ")),
+        Level(listOf('Ш', 'К', 'О', 'Л', 'А'), listOf("ШКОЛА", "ШКОЛ", "КОЛ"))
     )
 
-    // Список всех фонов
     private val backgrounds = listOf(
         R.drawable.bg_autumn,
         R.drawable.bg_forest,
@@ -61,27 +72,26 @@ class MainActivity : AppCompatActivity() {
 
     private fun loadLevel(levelIndex: Int) {
         if (levelIndex >= levels.size) {
-            tvCurrentWord.text = "Все уровни пройдены!"
+            tvCurrentWord.text = "Все 20 уровней пройдены! 🎉"
             return
         }
 
         val level = levels[levelIndex]
         
-        // 1. Ставим рандомный фон
-        val randomBg = backgrounds[Random.nextInt(backgrounds.size)]
-        rootLayout.setBackgroundResource(randomBg)
+        // Рандомный фон
+        rootLayout.setBackgroundResource(backgrounds[Random.nextInt(backgrounds.size)])
 
-        // 2. Загружаем буквы и слова
+        // Буквы для круга
         letterCircle.letters = level.letters
-        crosswordView.words = level.words
-        
-        // Сбрасываем сетку перед загрузкой
+
+        // Генерируем правильные координаты для сетки
+        val placements = generatePlacements(level.words)
+        crosswordView.words = placements
         crosswordView.reset()
 
         tvCurrentWord.text = "Уровень ${levelIndex + 1}"
 
-        // 3. Логика проверки слов
-        val validWords = level.words.map { it.word }.toSet()
+        val validWords = level.words.toSet()
 
         letterCircle.onWordCompleted = { word ->
             tvCurrentWord.text = "Собрано: $word"
@@ -90,7 +100,6 @@ class MainActivity : AppCompatActivity() {
                 crosswordView.addGuessedWord(word)
                 tvCurrentWord.text = "Отлично! $word"
                 
-                // Проверяем, все ли слова собраны
                 if (crosswordView.isLevelComplete()) {
                     showWinDialog(levelIndex)
                 }
@@ -100,30 +109,61 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // АВТОМАТИЧЕСКАЯ РАССТАНОВКА СЛОВ
+    private fun generatePlacements(words: List<String>): List<CrosswordView.WordPlacement> {
+        val placements = mutableListOf<CrosswordView.WordPlacement>()
+        if (words.isEmpty()) return placements
+
+        // Первое слово ставим горизонтально в центр
+        val firstWord = words[0]
+        placements.add(CrosswordView.WordPlacement(firstWord, 0, 2, true)) 
+        
+        // Остальные слова пытаемся пристроить к первому (пересечение по букве)
+        for (i in 1 until words.size) {
+            val word = words[i]
+            var placed = false
+            
+            // Ищем общую букву с первым словом
+            for (j in firstWord.indices) {
+                val char = firstWord[j]
+                val indexInWord = word.indexOf(char)
+                if (indexInWord != -1) {
+                    // Нашли пересечение! 
+                    // Ставим вертикально под этой буквой
+                    val startX = j
+                    val startY = 2 - indexInWord
+                    placements.add(CrosswordView.WordPlacement(word, startX, startY, false))
+                    placed = true
+                    break
+                }
+            }
+            
+            // Если не нашли пересечение - ставим отдельно справа
+            if (!placed) {
+                placements.add(CrosswordView.WordPlacement(word, 4, 2, true))
+            }
+        }
+        return placements
+    }
+
     private fun showWinDialog(currentLevelIndex: Int) {
-        // Создаем кастомный диалог
         val dialog = Dialog(this)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         dialog.setContentView(R.layout.dialog_win)
-        
-        // Делаем фон прозрачным, чтобы были видны скругления
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         
-        // Кнопка "Продолжить"
         val btnContinue = dialog.findViewById<Button>(R.id.btnContinue)
         btnContinue.setOnClickListener {
             dialog.dismiss()
             currentLevel++
             loadLevel(currentLevel)
         }
-        
         dialog.setCancelable(false)
         dialog.show()
     }
 
-    // Класс для уровня
     data class Level(
         val letters: List<Char>,
-        val words: List<CrosswordView.WordPlacement>
+        val words: List<String>
     )
 }
