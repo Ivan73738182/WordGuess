@@ -15,20 +15,21 @@ class MainActivity : AppCompatActivity() {
 
         letterCircle.letters = listOf('К', 'О', 'Т')
 
-        // ПРАВИЛЬНЫЕ КООРДИНАТЫ:
-        // "КОТ" - горизонтально с (0,0) до (2,0)
-        // "ТОК" - вертикально с (2,0) до (2,2)
-        crosswordView.words = listOf(
+        // Слова уровня
+        val levelWords = listOf(
             CrosswordView.WordPlacement("КОТ", 0, 0, true),
             CrosswordView.WordPlacement("ТОК", 2, 0, false)
         )
+        crosswordView.words = levelWords
 
-        val validWords = setOf("КОТ", "ТОК")
+        // Список допустимых слов (для проверки)
+        val validWords = levelWords.map { it.word }.toSet()
 
         letterCircle.onWordCompleted = { word ->
             tvCurrentWord.text = "Собрано: $word"
             
             if (validWords.contains(word)) {
+                // Вписываем слово в сетку целиком
                 crosswordView.addGuessedWord(word)
                 tvCurrentWord.text = "Отлично! $word"
             } else {

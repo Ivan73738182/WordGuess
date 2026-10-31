@@ -20,7 +20,8 @@ class CrosswordView @JvmOverloads constructor(
             invalidate()
         }
 
-    private val guessedLetters = mutableMapOf<String, Char>()
+    // Множество угаданных слов
+    private val guessedWords = mutableSetOf<String>()
 
     private val cellPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#B3D4F0") 
@@ -62,11 +63,10 @@ class CrosswordView @JvmOverloads constructor(
                 
                 rect.set(left + 4f, top + 4f, left + cellSize - 4f, top + cellSize - 4f)
 
-                val key = "$x,$y"
-                
-                if (guessedLetters.containsKey(key)) {
+                if (guessedWords.contains(word.word)) {
                     canvas.drawRoundRect(rect, 12f, 12f, cellGuessedPaint)
-                    val char = guessedLetters[key]!!
+                    // Рисуем букву из слова
+                    val char = word.word[i]
                     val textY = top + cellSize / 2 - (textPaint.descent() + textPaint.ascent()) / 2
                     canvas.drawText(char.toString(), left + cellSize / 2, textY, textPaint)
                 } else {
@@ -76,16 +76,11 @@ class CrosswordView @JvmOverloads constructor(
         }
     }
 
+    // Добавляем слово целиком в список угаданных
     fun addGuessedWord(word: String) {
-        for (w in words) {
-            if (w.word == word) {
-                for (i in word.indices) {
-                    val x = if (w.isHorizontal) w.startX + i else w.startX
-                    val y = if (w.isHorizontal) w.startY + i else w.startY
-                    guessedLetters["$x,$y"] = word[i]
-                }
-            }
+        if (words.any { it.word == word }) {
+            guessedWords.add(word)
+            invalidate()
         }
-        invalidate()
     }
 }
